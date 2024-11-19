@@ -6,6 +6,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+// Clase para consultar la API
+// Recibe la URL de la petición a la API
+// Devuelve un objeto String en formato JSON con los datos solicitados por la URL
+
 public class ConsumoAPI {
     public String obtenerDatos(String url){
         HttpClient client = HttpClient.newHttpClient();

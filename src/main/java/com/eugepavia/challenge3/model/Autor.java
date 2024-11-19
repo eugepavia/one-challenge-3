@@ -2,8 +2,9 @@ package com.eugepavia.challenge3.model;
 
 import com.eugepavia.challenge3.dto.AutorDTO;
 
-import java.util.Date;
 import java.util.List;
+
+// Clase modelo para los objetos Autor
 
 public class Autor {
     private String nombre;

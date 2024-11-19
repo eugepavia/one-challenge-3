@@ -4,6 +4,9 @@ import com.eugepavia.challenge3.dto.LibroDTO;
 
 import java.util.Optional;
 
+// Clase modelo para los objetos Libro
+// En caso de múltiples actores e idiomas, se considera solo al primero del registro
+
 public class Libro {
     private String titulo;
     private Autor autor;
