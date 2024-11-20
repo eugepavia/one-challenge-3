@@ -1,6 +1,5 @@
 package com.eugepavia.challenge3;
 
-import com.eugepavia.challenge3.model.Autor;
 import com.eugepavia.challenge3.principal.Principal;
 import com.eugepavia.challenge3.repository.AutorRepository;
 import com.eugepavia.challenge3.repository.LibroRepository;
