@@ -2,12 +2,12 @@ package com.eugepavia.challenge3.principal;
 
 import com.eugepavia.challenge3.dto.ResultadosDTO;
 import com.eugepavia.challenge3.model.Autor;
+import com.eugepavia.challenge3.model.Idioma;
 import com.eugepavia.challenge3.model.Libro;
 import com.eugepavia.challenge3.repository.AutorRepository;
 import com.eugepavia.challenge3.repository.LibroRepository;
 import com.eugepavia.challenge3.service.ConsumoAPI;
 import com.eugepavia.challenge3.service.ConversionDatos;
-import jakarta.transaction.Transactional;
 
 import java.util.*;
 
@@ -18,18 +18,27 @@ public class Principal {
     LibroRepository repositorioLibro;
     AutorRepository repositorioAutor;
     private String url = "https://gutendex.com/books/?";
+
     private String menu = """
-            ********** CATÁLOGO LITERALURA **********
+            ****************** CATÁLOGO LITERALURA ******************
             Elija una opción del menú:
-            1 - Buscar y registrar libro por título
-            2 - Mostrar lista de libros registrados
-            3 - Mostrar lista de autores registrados
-            4 - Mostrar lista de autores vivos en un determinado año
-            5 - Listar libros por idioma (en, es, fr, pt)
-            6 - Eliminar libro
+            
+            1 - Registrar libro por título
+            2 - Eliminar libro por título
+            
+            3 - Buscar libro en el registro
+            4 - Mostrar lista de libros registrados
+            5 - Mostrar lista de libros por idioma
+            
+            6 - Buscar autor en el registro
+            7 - Mostrar lista de autores registrados
+            8 - Mostrar lista de autores vivos en un determinado año
+            
+            9 - Mostrar estadísticas de libros registrados
+            10 - Top 10 libros registrados más populares
             
             0 - Salir
-            *****************************************""";
+            *********************************************************""";
 
     // CONSTRUCTOR
     public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
@@ -48,29 +57,38 @@ public class Principal {
                 teclado.nextLine();
                 switch (opcion) {
                     case 1:
-                        buscaTitulo();
+                        registraBusqueda();
                         break;
                     case 2:
-                        muestraListaTitulos();
+                        eliminaBusqueda();
                         break;
                     case 3:
-                        muestraListaAutores();
+                        buscaLibroDB();
                         break;
                     case 4:
-                        muestraAutoresPorAnio();
+                        muestraListaTitulos();
+                        break;
+                    case 5:
+                        muestraLibrosPorIdioma();
                         break;
                     case 6:
-                        eliminaTitulo();
+                        buscaAutorDB();
+                        break;
+                    case 7:
+                        muestraListaAutores();
+                        break;
+                    case 8:
+                        muestraAutoresPorAnio();
                         break;
                     case 0:
-                        System.out.println("Finalizando programa");
+                        System.out.println("Finalizando programa...");
                         break;
                     default:
-                        System.out.println("Opción no válida. Elija una alternativa del menú");
+                        System.out.println("Opción no válida. Elija una alternativa del menú.");
                         break;
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Entrada no válida. Sólo se aceptan números");
+                System.out.println("Entrada no válida. Sólo se aceptan números.");
                 opcion = -1;
                 teclado.nextLine();
             }
@@ -82,7 +100,7 @@ public class Principal {
     // MÉTODOS
 
     // OPCIÓN 1
-    private void buscaTitulo() {
+    private void registraBusqueda() {
         System.out.println("Nombre del libro:");
         var titulo = teclado.nextLine();
         String json = api.obtenerDatos(url+"search="+titulo.toLowerCase().replace(" ","+"));
@@ -97,13 +115,119 @@ public class Principal {
         if (libro.isPresent()) {
             registraLibro(libro.get());
         } else {
-            System.out.println("No se hallaron coincidencias");
+            System.out.println("No se hallaron coincidencias.");
         }
     }
 
+    // OPCIÓN 2
+    private void eliminaBusqueda() {
+        muestraListaTitulos();
+        System.out.println("Nombre del libro a eliminar:");
+        var titulo = teclado.nextLine();
+        Optional<Libro> libro = repositorioLibro.findByTituloContainsIgnoreCase(titulo);
+        if (libro.isPresent()) {
+            Autor autor = libro.get().getAutor();
+            autor.removeLibro(libro.get());
+            if (autor.getLibros().isEmpty()) {
+                repositorioAutor.delete(autor);
+            } else {
+                repositorioAutor.save(autor);
+            }
+            System.out.println("Libro eliminado del registro.");
+        } else {
+            System.out.println("El libro no se encuentra registrado.");
+        }
+
+    }
+
+    // OPCIÓN 3
+    private void buscaLibroDB() {
+        System.out.println("Nombre del libro:");
+        var titulo = teclado.nextLine();
+        List<Libro> resultado = repositorioLibro.buscaLibroDB(titulo);
+        if (resultado.isEmpty()) {
+            System.out.println("No se hallaron coincidencias.");
+        } else {
+            stringLibros(resultado);
+        }
+    }
+
+    // OPCIÓN 4
+    private void muestraListaTitulos() {
+        List<Libro> lista = repositorioLibro.findAll();
+        stringLibros(lista);
+    }
+
+    // OPCIÓN 5
+    private void muestraLibrosPorIdioma() {
+        String texto = """
+                IDIOMAS DISPONIBLES
+                   de - Alemán
+                   zh - Chino
+                   es - Español
+                   fr - Francés
+                   en - Inglés
+                   it - Italiano
+                   pt - Portugués
+                """;
+        System.out.println(texto);
+        System.out.println("Ingrese la clave del idioma del cual desea buscar libros:");
+        var clave = teclado.nextLine();
+        Idioma idioma = Idioma.leeClave(clave);
+        if (idioma == Idioma.DESCONOCIDO) {
+            System.out.println("Clave no reconocida.");
+        } else {
+            List<Libro> lista = repositorioLibro.buscaLibroPorIdioma(idioma);
+            if (lista.isEmpty()) {
+                System.out.println("No hay libros registrados en ese idioma.");
+            } else {
+                stringLibros(lista);
+            }
+        }
+    }
+
+    // OPCIÓN 6
+    private void buscaAutorDB() {
+        System.out.println("Nombre del autor:");
+        var nombre = teclado.nextLine();
+        List<Autor> resultado = repositorioAutor.buscaAutorDB(nombre);
+        if (resultado.isEmpty()) {
+            System.out.println("No se hallaron coincidencias.");
+        } else {
+            stringAutores(resultado);
+        }
+    }
+
+    // OPCIÓN 7
+    private void muestraListaAutores() {
+        List<Autor> lista = repositorioAutor.findAll();
+        stringAutores(lista);
+    }
+
+    // OPCIÓN 8
+    private void muestraAutoresPorAnio() {
+        System.out.println("Ingrese el año a partir del cual desea buscar:");
+        try {
+            var anio = teclado.nextDouble();
+            teclado.nextLine();
+            List<Autor> lista = repositorioAutor.buscaAutorPorAnio(anio);
+            if (lista.isEmpty()) {
+                System.out.println("No se encontraron autores vivos en ese año.");
+            } else {
+                stringAutores(lista);
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Año no válido. Sólo se aceptan números enteros.");
+        }
+    }
+
+
+
+    // MÉTODOS AUXILIARES
+
     private void registraLibro(Libro libro) {
         if (repositorioLibro.findByTituloContainsIgnoreCase(libro.getTitulo()).isPresent()) {
-            System.out.println("Libro registrado anteriormente. No puede repetirse su registro");
+            System.out.println("Libro registrado anteriormente. No puede repetirse su registro.");
         } else {
             registraAutor(libro.getAutor());
             Autor autor = repositorioAutor.buscaAutorPorNombre(libro.getAutor().getNombre());
@@ -121,20 +245,32 @@ public class Principal {
         }
     }
 
-    // OPCIÓN 2
-    private void muestraListaTitulos() {
-        List<Libro> lista = repositorioLibro.findAll();
-        lista.forEach(System.out::println);
-    }
-
-    // OPCIÓN 3
-    private void muestraListaAutores() {
-        List<Autor> lista = repositorioAutor.findAll();
-        stringAutores(lista);
+    private void stringLibros(List<Libro> lista) {
+        lista.stream()
+                .sorted(Comparator.comparing(Libro::getTitulo))
+                .forEach(System.out::println);
     }
 
     private void stringAutores(List<Autor> lista) {
         String texto;
+        int posicion = -1;
+        int n = 0;
+
+        // Ordena por letra, deja a autores desconocidos al final
+        lista.stream().sorted(Comparator.comparing(Autor::getNombre));
+        for (Autor autor : lista) {
+            if (autor.getNombre().equalsIgnoreCase("Desconocido")) {
+                posicion = n;
+                break;
+            }
+            n ++;
+        }
+        if (posicion != -1) {
+            Autor desconocido = lista.remove(posicion);
+            lista.add(desconocido);
+        }
+
+        // Imprime a cada autor con todas sus obras
         for (Autor autor : lista) {
             List<String> obras = new ArrayList<>();
             for (Libro libro : autor.getLibros()) {
@@ -159,42 +295,6 @@ public class Principal {
         }
 
     }
-
-    // OPCIÓN 4
-    private void muestraAutoresPorAnio() {
-        System.out.println("Ingrese el año a partir del cual desea buscar:");
-        var anio = teclado.nextDouble();
-        teclado.nextLine();
-        List<Autor> lista = repositorioAutor.buscaAutorPorAnio(anio);
-        if (lista.isEmpty()) {
-            System.out.println("No se encontraron autores vivos en ese año");
-        } else {
-            stringAutores(lista);
-        }
-    }
-
-    // OPCIÓN 6
-    private void eliminaTitulo() {
-        muestraListaTitulos();
-        System.out.println("Nombre del libro a eliminar:");
-        var titulo = teclado.nextLine();
-        Optional<Libro> libro = repositorioLibro.findByTituloContainsIgnoreCase(titulo);
-        if (libro.isPresent()) {
-            Autor autor = libro.get().getAutor();
-            autor.removeLibro(libro.get());
-            if (autor.getLibros().isEmpty()) {
-                repositorioAutor.delete(autor);
-            } else {
-                repositorioAutor.save(autor);
-            }
-            System.out.println("Libro eliminado del registro");
-        } else {
-            System.out.println("El libro no se encuentra registrado");
-        }
-
-    }
-
-
 
 
 

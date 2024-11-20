@@ -9,7 +9,8 @@ public enum Idioma {
     FRANCES("fr", "Francés"),
     CHINO("zh", "Chino"),
     ALEMAN("de", "Alemán"),
-    ITALIANO("it", "Italiano");
+    ITALIANO("it", "Italiano"),
+    DESCONOCIDO("un","Desconocido");
 
     private String idiomaClave;
     private String idiomaEspanol;
@@ -26,7 +27,7 @@ public enum Idioma {
                 return idioma;
             }
         }
-        throw new IllegalArgumentException("Idioma no encontrado: " + clave);
+        return Idioma.DESCONOCIDO;
     }
 
     // Recibe el valor Enum Idioma de un libro. Devuelve su equivalente en español
