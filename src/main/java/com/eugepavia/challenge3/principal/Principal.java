@@ -80,6 +80,12 @@ public class Principal {
                     case 8:
                         muestraAutoresPorAnio();
                         break;
+                    case 9:
+                        muestraStats();
+                        break;
+                    case 10:
+                        top10Libros();
+                        break;
                     case 0:
                         System.out.println("Finalizando programa...");
                         break;
@@ -221,6 +227,47 @@ public class Principal {
         }
     }
 
+    // OPCIÓN 9
+    public void muestraStats() {
+        DoubleSummaryStatistics stats = repositorioLibro.findAll().stream()
+                .mapToDouble(Libro::getDescargas)
+                .summaryStatistics();
+
+        Optional<Libro> maximo = repositorioLibro.findAll().stream()
+                .filter(l -> l.getDescargas() == stats.getMax())
+                .findFirst();
+
+        Optional<Libro> minimo = repositorioLibro.findAll().stream()
+                .filter(l -> l.getDescargas() == stats.getMin())
+                .findFirst();
+
+        String texto = """
+                ESTADÍSTICAS DE LIBROS REGISTRADOS
+                Cantidad de registros: %d
+                Libro más popular: %s (%.0f descargas)
+                Libro menos popular: %s (%.0f descargas)
+                """.formatted(stats.getCount(),maximo.get().getTitulo(),stats.getMax(),minimo.get().getTitulo(),stats.getMin());
+
+        System.out.println(texto);
+    }
+
+    // OPCIÓN 10
+    public void top10Libros() {
+        List<Libro> lista = repositorioLibro.top10Libros();
+        String texto;
+        if (lista.isEmpty()) {
+            System.out.println("Aun no se registran libros.");
+        } else {
+            System.out.println("TOP 10 LIBROS");
+            for (int i = 0; i < lista.size(); i++) {
+                Libro elemento = lista.get(i);
+                // texto = (i+1) + " - " + elemento.getTitulo() + " (" + elemento.getDescargas() + " descargas)";
+                texto = """
+                        %d - %s (%.0f descargas)""".formatted(i+1,elemento.getTitulo(),elemento.getDescargas());
+                System.out.println(texto);
+            }
+        }
+    }
 
 
     // MÉTODOS AUXILIARES

@@ -22,4 +22,7 @@ public interface LibroRepository extends JpaRepository<Libro,Long> {
     @Query("SELECT l FROM Libro l WHERE l.titulo ILIKE %:titulo%")
     List<Libro> buscaLibroDB(String titulo);
 
+    @Query("SELECT l FROM Libro l ORDER BY l.descargas DESC LIMIT 10")
+    List<Libro> top10Libros();
+
 }
