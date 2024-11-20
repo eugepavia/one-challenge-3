@@ -1,18 +1,29 @@
 package com.eugepavia.challenge3.model;
 
 import com.eugepavia.challenge3.dto.LibroDTO;
+import jakarta.persistence.*;
 
 import java.util.Optional;
 
 // Clase modelo para los objetos Libro
 // En caso de múltiples actores e idiomas, se considera solo al primero del registro
 
+@Entity
+@Table(name = "Libros")
 public class Libro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Column(unique = true)
     private String titulo;
+    @ManyToOne
     private Autor autor;
+    @Enumerated(value = EnumType.STRING)
     private Idioma idioma;
     private double descargas;
 
+    // CONSTRUCTORES
+    public Libro () {}
     public Libro(LibroDTO dto) {
         Optional<Autor> resultado = dto.autor().stream()
                 .map(a -> new Autor(a))
@@ -20,7 +31,7 @@ public class Libro {
         if (resultado.isPresent()) {
             this.autor = resultado.get();
         } else {
-            this.autor = new Autor("Desconocido",0,0);
+            this.autor = new Autor("Desconocido",-100000,-100000);
         }
 
         this.titulo = dto.titulo();
@@ -41,6 +52,7 @@ public class Libro {
         return texto;
     }
 
+
     // GETTERS
     public String getTitulo() {
         return titulo;
@@ -53,5 +65,10 @@ public class Libro {
     }
     public double getDescargas() {
         return descargas;
+    }
+
+    // SETTERS
+    public void setAutor(Autor autor) {
+        this.autor = autor;
     }
 }
