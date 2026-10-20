@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2024 Eugenia Pavía Ruz
+Copyright (c) 2026 Eugenia Pavía Ruz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

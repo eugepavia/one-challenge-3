@@ -61,13 +61,13 @@ En caso de requerirse registrar más idiomas, se debe editar la clase `Enum Idio
 
 ## :white_check_mark: Requisitos
 - Base de datos PostgreSQL
-- Edición del archivo `application.properties`, en los apartados siguientes según los datos de quien lo ejecute:
-  - spring.datasource.url
-  - spring.datasource.username
-  - spring.datasource.password
-
+  - Crear la base de datos de manera local
+- Duplicar el archivo _application.example.properties_ de la carpeta _resources_, renombrar a application.properties y agregar las variables de entorno correspondientes:
+  - spring.datasource.url: Añadir el nombre del host y de la base de datos local
+  - spring.datasource.username: Nombre de usuario de PostgreSQL
+  - spring.datasource.password: Contraseña de PostgreSQL
 
 ## :wave: Sobre mí
-¡Hola! Me llamo Eugenia. Soy una entusiasta del aprendizaje con gusto en la ciencia, matemáticas y tecnología.
+¡Hola! Soy Eugenia, programadora Backend en crecimiento. Empecé como profesora de matemáticas, pero mi interés por el desarrollo de software me llevó a formarme en tecnologías Backend.
 
-Actualmente soy parte del programa Oracle Next Education, con el propósito de expandir mis conocimientos y desarrollarme profesionalmente en el mundo de la programación Back-End.
+Me entusiasma seguir aprendiendo, compartir mis conocimientos y poner mis habilidades al servicio de proyectos que aporten valor. ¿Empezamos?
